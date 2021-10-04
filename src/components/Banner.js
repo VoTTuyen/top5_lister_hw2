@@ -10,5 +10,5 @@ export default class Banner extends React.Component {
                 <EditToolbar />
             </div>
         );
-    }
+    } 
 }

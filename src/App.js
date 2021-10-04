@@ -144,27 +144,29 @@ class App extends React.Component {
     }
     render() {
         return (
-            <div id="app-root">
-                <Banner 
-                    title='Top 5 Lister'
-                    closeCallback={this.closeCurrentList} />
-                <Sidebar
-                    heading='Your Lists'
-                    currentList={this.state.currentList}
-                    keyNamePairs={this.state.sessionData.keyNamePairs}
-                    createNewListCallback={this.createNewList}
-                    deleteListCallback={this.deleteList}
-                    loadListCallback={this.loadList}
-                    renameListCallback={this.renameList}
-                />
+          <div id="app-root">
+            <Banner
+              title="Top 5 Lister"
+              closeCallback={this.closeCurrentList}
+            />
+            <Sidebar
+              heading="Your Lists"
+              currentList={this.state.currentList}
+              keyNamePairs={this.state.sessionData.keyNamePairs}
+              createNewListCallback={this.createNewList}
+              deleteListCallback={this.deleteList}
+              loadListCallback={this.loadList}
+              renameListCallback={this.renameList}
+            />
                 <Workspace
                     currentList={this.state.currentList} />
-                <Statusbar 
-                    currentList={this.state.currentList} />
-                <DeleteModal
-                    hideDeleteListModalCallback={this.hideDeleteListModal}
-                />
-            </div>
+                
+            <Statusbar currentList={this.state.currentList} />
+            <DeleteModal
+              currentList={this.state.currentList}
+              hideDeleteListModalCallback={this.hideDeleteListModal}
+            />
+          </div>
         );
     }
 }

@@ -1,5 +1,4 @@
 import React from "react";
-
 export default class ListCard extends React.Component {
     constructor(props) {
         super(props);
@@ -9,6 +8,7 @@ export default class ListCard extends React.Component {
             editActive: false,
         }
     }
+    
     handleClick = (event) => {
         if (event.detail === 1) {
             this.handleLoadList(event);
@@ -50,8 +50,8 @@ export default class ListCard extends React.Component {
     }
 
     render() {
-        const { keyNamePair, selected } = this.props;
 
+        const { keyNamePair, selected } = this.props;
         if (this.state.editActive) {
             return (
                 <input

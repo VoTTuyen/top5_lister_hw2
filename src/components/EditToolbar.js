@@ -2,12 +2,14 @@ import React from "react";
 
 export default class EditToolbar extends React.Component {
     render() {
+     
         return (
             <div id="edit-toolbar">
-                <div 
+                <div
+                    type="button"
                     id='undo-button' 
                     className="top5-button">
-                        &#x21B6;
+                    &#x21B6;
                 </div>
                 <div
                     id='redo-button'
