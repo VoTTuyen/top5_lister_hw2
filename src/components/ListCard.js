@@ -50,8 +50,12 @@ export default class ListCard extends React.Component {
     }
 
     render() {
-
         const { keyNamePair, selected } = this.props;
+
+        let deleteList = () => {
+            this.props.deleteListCallback(keyNamePair);
+        }
+
         if (this.state.editActive) {
             return (
                 <input
@@ -71,24 +75,27 @@ export default class ListCard extends React.Component {
                 selectClass = "selected-list-card";
             }
             return (
-                <div
-                    id={keyNamePair.key}
-                    key={keyNamePair.key}
-                    onClick={this.handleClick}
-                    className={'list-card ' + selectClass}>
-                    <span
-                        id={"list-card-text-" + keyNamePair.key}
-                        key={keyNamePair.key}
-                        className="list-card-text">
-                        {keyNamePair.name}
-                    </span>
-                    <input
-                        type="button"
-                        id={"delete-list-" + keyNamePair.key}
-                        className="list-card-button"
-                        onClick={this.handleDeleteList}
-                        value={"\u2715"} />
-                </div>
+              <div
+                id={keyNamePair.key}
+                key={keyNamePair.key}
+                onClick={this.handleClick}
+                className={"list-card " + selectClass}
+              >
+                <span
+                  id={"list-card-text-" + keyNamePair.key}
+                  key={keyNamePair.key}
+                  className="list-card-text"
+                >
+                  {keyNamePair.name}
+                </span>
+                <input
+                  type="button"
+                  id={"delete-list-" + keyNamePair.key}
+                  className="list-card-button"
+                  onClick={deleteList}
+                  value={"\u2715"}
+                />
+              </div>
             );
         }
     }

@@ -23,9 +23,10 @@ class App extends React.Component {
 
         // SETUP THE INITIAL STATE
         this.state = {
-            currentList : null,
-            sessionData : loadedSessionData
-        }
+          currentList: null,
+          sessionData: loadedSessionData,
+          keyNamePair: null, // for deleting a list (key = (id, name))
+        };
     }
     sortKeyNamePairsByName = (keyNamePairs) => {
         keyNamePairs.sort((keyPair1, keyPair2) => {
@@ -124,11 +125,14 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = () => {
+    deleteList = (keyNamePair) => {
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
+        this.setState(prevState => ({
+            keyNamePair: keyNamePair
+        }))
         this.showDeleteListModal();
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
@@ -158,12 +162,11 @@ class App extends React.Component {
               loadListCallback={this.loadList}
               renameListCallback={this.renameList}
             />
-                <Workspace
-                    currentList={this.state.currentList} />
-                
+            <Workspace currentList={this.state.currentList} />
+
             <Statusbar currentList={this.state.currentList} />
             <DeleteModal
-              currentList={this.state.currentList}
+              listKeyPair={this.state.keyNamePair}
               hideDeleteListModalCallback={this.hideDeleteListModal}
             />
           </div>

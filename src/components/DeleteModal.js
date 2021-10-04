@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class M extends Component {
+export default class DeleteModal extends Component {
     render() {
         const { listKeyPair, hideDeleteListModalCallback } = this.props;
         let name = "";
