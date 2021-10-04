@@ -3,18 +3,21 @@ import ItemCard from "./ItemCard";
 
 export default class Workspace extends React.Component {
   render() {
-    let list = this.props.currentList;
+    const { currentList, renameItemCallback, moveItemCallback } = this.props;
     let divItems;
-    if (list !== null) {
+    if (currentList !== null) {
       let id = 0;
       divItems = (
         <div id="edit-items">
-          {list.items.map((item) => (
-              <ItemCard
-                  key={item + (id)}
-                  className='top5-item'
-                  id={(id++)}
-                  text={item} />
+          {currentList.items.map((item) => (
+            <ItemCard
+              key={item + id}
+              className="top5-item"
+              id={id++}
+              text={item}
+              renameItemCallback={renameItemCallback}
+              moveItemCallback={moveItemCallback}
+            />
           ))}
         </div>
       );
