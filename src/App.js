@@ -10,6 +10,9 @@ import Banner from "./components/Banner.js";
 import Sidebar from "./components/Sidebar.js";
 import Workspace from "./components/Workspace.js";
 import Statusbar from "./components/Statusbar.js";
+import jsTPS from "./jsTPS.js";
+import MoveItem_Transaction from "./MoveItem_Transaction";
+import RenameItem_Transaction from "./RenameItem_Transaction";
 
 /*
 Undo/Redo - Undo/Redo should also work using Control-Z and Control-Y.
@@ -23,6 +26,7 @@ class App extends React.Component {
 
     // THIS WILL TALK TO LOCAL STORAGE
     this.db = new DBManager();
+    this.jsTPS = new jsTPS();
 
     // GET THE SESSION DATA FROM OUR DATA MANAGER
     let loadedSessionData = this.db.queryGetSessionData();
@@ -117,25 +121,57 @@ class App extends React.Component {
       }
     );
   };
-
+  // RENAME LIST ITEM
   renameItem = (index, newText) => {
-    let items = this.state.currentList.items;
-    // let oldText = items[index];
-    items[index] = newText;
+    let list = this.state.currentList;
+    let oldText = list.items[index];
+
+    let foo = (list, index, newText) => {
+      list.items[index] = newText;
+      this.db.mutationUpdateList(list);
+    };
+    
+    let renameItem_Transaction = new RenameItem_Transaction(foo, list, index, oldText, newText);
+    this.jsTPS.addTransaction(renameItem_Transaction);
     this.setState((prevState) => ({
       currentList: prevState.currentList,
     }));
   };
+  // DRAG AND DROP  
   moveItem = (oldIndex, newIndex) => {
-    let items = this.state.currentList.items;
-    items.splice(newIndex, 0, items.splice(oldIndex, 1)[0]);
+    let list = this.state.currentList;
+    let foo = (list, oldIndex, newIndex) => {
+      list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]);
+      this.db.mutationUpdateList(list);
+    };
+    let moveItem_Transaction = new MoveItem_Transaction(foo, list, oldIndex, newIndex);
+    this.jsTPS.addTransaction(moveItem_Transaction);
     this.setState((prevState) => ({
-
+      currentList: prevState.currentList
     }));
-
-
   };
-
+  // UNDO AND REDO FUNCTION
+  undo = () => {
+    if (this.jsTPS.hasTransactionToUndo()) {
+          this.jsTPS.undoTransaction();
+    } else {
+      
+    }
+    this.setState((prevState) => ({
+      currentList: prevState.currentList,
+    }));
+  };
+  redo = () => {
+    if (this.jsTPS.hasTransactionToRedo()) {
+      this.jsTPS.doTransaction();
+    } else {
+      
+    }
+      this.setState((prevState) => ({
+        currentList: prevState.currentList,
+      }));
+    
+  };
   // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
   loadList = (key) => {
     let newCurrentList = this.db.queryGetList(key);
@@ -202,7 +238,12 @@ class App extends React.Component {
   render() {
     return (
       <div id="app-root">
-        <Banner title="Top 5 Lister" closeCallback={this.closeCurrentList} />
+        <Banner title="Top 5 Lister"
+          closeCallback={this.closeCurrentList}
+          undoCallback={this.undo}
+          redoCallback={this.redo}
+        
+        />
         <Sidebar
           heading="Your Lists"
           currentList={this.state.currentList}
