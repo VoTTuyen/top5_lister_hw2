@@ -15,7 +15,6 @@ import MoveItem_Transaction from "./MoveItem_Transaction";
 import RenameItem_Transaction from "./RenameItem_Transaction";
 
 /*
-List Saving - after every single edit, data should be saved to local storage. Remember to also save session data when necessary, like when a list is deleted.
 Foolproof Design - make sure the undo, redo, and close buttons are only enabled when they are usable. When disabled, they should look faded (use transparency) and should not be clickable.
 */
 
@@ -35,6 +34,9 @@ class App extends React.Component {
       currentList: null,
       sessionData: loadedSessionData,
       keyNamePair: null, // for deleting a list (key = (id, name))
+      undoButtonOn: false,
+      redoButtonOn: false,
+      closeButtonOn: false,
     };
   }
   sortKeyNamePairsByName = (keyNamePairs) => {
@@ -107,7 +109,7 @@ class App extends React.Component {
         sessionData: {
           nextKey: prevState.sessionData.nextKey,
           counter: prevState.sessionData.counter,
-          keyNamePairs: newKeyNamePairs,
+          keyNamePairs: newKeyNamePairs
         },
       }),
       () => {
@@ -130,54 +132,72 @@ class App extends React.Component {
       this.db.mutationUpdateList(list);
     };
 
-    let renameItem_Transaction = new RenameItem_Transaction(foo, list, index, oldText, newText);
+    let renameItem_Transaction = new RenameItem_Transaction(
+      foo,
+      list,
+      index,
+      oldText,
+      newText
+    );
     this.jsTPS.addTransaction(renameItem_Transaction);
     this.setState((prevState) => ({
       currentList: prevState.currentList,
+      undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+      redoButtonOn: this.jsTPS.hasTransactionToRedo(),
     }));
   };
-  // DRAG AND DROP  
+  // DRAG AND DROP
   moveItem = (oldIndex, newIndex) => {
     let list = this.state.currentList;
     let foo = (list, oldIndex, newIndex) => {
       list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]);
       this.db.mutationUpdateList(list);
     };
-    let moveItem_Transaction = new MoveItem_Transaction(foo, list, oldIndex, newIndex);
+    let moveItem_Transaction = new MoveItem_Transaction(
+      foo,
+      list,
+      oldIndex,
+      newIndex
+    );
     this.jsTPS.addTransaction(moveItem_Transaction);
     this.setState((prevState) => ({
-      currentList: prevState.currentList
+      currentList: prevState.currentList,
+      undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+      redoButtonOn: this.jsTPS.hasTransactionToRedo(),
     }));
   };
   // UNDO AND REDO FUNCTION
   undo = () => {
     if (this.jsTPS.hasTransactionToUndo()) {
-          this.jsTPS.undoTransaction();
-    } else {
-      
+      this.jsTPS.undoTransaction();
     }
     this.setState((prevState) => ({
       currentList: prevState.currentList,
+      undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+      redoButtonOn: this.jsTPS.hasTransactionToRedo(),
     }));
   };
   redo = () => {
     if (this.jsTPS.hasTransactionToRedo()) {
       this.jsTPS.doTransaction();
-    } else {
-      
     }
-      this.setState((prevState) => ({
-        currentList: prevState.currentList,
-      }));
-    
+    this.setState((prevState) => ({
+      currentList: prevState.currentList,
+      undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+      redoButtonOn: this.jsTPS.hasTransactionToRedo(),
+    }));
   };
   // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
   loadList = (key) => {
+  this.jsTPS.clearAllTransactions();
     let newCurrentList = this.db.queryGetList(key);
     this.setState(
       (prevState) => ({
         currentList: newCurrentList,
         sessionData: prevState.sessionData,
+        closeButtonOn: true,
+        undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+        redoButtonOn: this.jsTPS.hasTransactionToRedo(),
       }),
       () => {
         // ANY AFTER EFFECTS?
@@ -186,12 +206,16 @@ class App extends React.Component {
   };
   // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
   closeCurrentList = () => {
+    this.jsTPS.clearAllTransactions();
     this.setState(
       (prevState) => ({
         currentList: null,
         listKeyPairMarkedForDeletion: prevState.listKeyPairMarkedForDeletion,
         sessionData: this.state.sessionData,
         keyNamePair: null,
+        closeButtonOn: false,
+        undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+        redoButtonOn: this.jsTPS.hasTransactionToRedo(),
       }),
       () => {
         // ANY AFTER EFFECTS?
@@ -207,6 +231,8 @@ class App extends React.Component {
     this.setState((prevState) => ({
       currentList: prevState.currentList,
       keyNamePair: keyNamePair,
+      undoButtonOn: this.jsTPS.hasTransactionToUndo(),
+      redoButtonOn: this.jsTPS.hasTransactionToRedo(),
     }));
   };
 
@@ -220,7 +246,6 @@ class App extends React.Component {
       currentList: prevState.currentList,
       keyNamePair: null,
       sessionData: loadedSessionData,
-
     }));
   };
   // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
@@ -234,14 +259,29 @@ class App extends React.Component {
     let modal = document.getElementById("delete-modal");
     modal.classList.remove("is-visible");
   }
+
+  keyHandler = (e) => {
+    if (e.ctrlKey && e.key === "z") {
+      this.undo();
+    } else if (e.ctrlKey && e.key === "y") {
+      this.redo();
+    }
+  }
+
   render() {
+
+    window.addEventListener("keydown", this.keyHandler);
+
     return (
       <div id="app-root">
-        <Banner title="Top 5 Lister"
-          closeCallback={this.closeCurrentList}
+        <Banner
+          title="Top 5 Lister"
+          undoButtonOn={this.state.undoButtonOn}
+          redoButtonOn={this.state.redoButtonOn}
+          closeButtonOn={this.state.closeButtonOn}
           undoCallback={this.undo}
           redoCallback={this.redo}
-        
+          closeCallback={this.closeCurrentList}
         />
         <Sidebar
           heading="Your Lists"
@@ -258,7 +298,9 @@ class App extends React.Component {
           moveItemCallback={this.moveItem}
         />
 
-        <Statusbar currentList={this.state.currentList} />
+        <Statusbar
+          currentList={this.state.currentList}
+        />
         <DeleteModal
           listKeyPair={this.state.keyNamePair}
           hideDeleteListModalCallback={this.hideDeleteListModal}

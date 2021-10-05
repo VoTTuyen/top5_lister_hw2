@@ -51,7 +51,8 @@ export default class ListCard extends React.Component {
   render() {
     const { keyNamePair, selected } = this.props;
 
-    let deleteList = () => {
+    let deleteList = (event) => {
+      event.stopPropagation();
       this.props.deleteListCallback(keyNamePair); // get name & key of the list want to delete
     };
 

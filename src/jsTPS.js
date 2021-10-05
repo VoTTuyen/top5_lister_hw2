@@ -179,6 +179,7 @@ export default class jsTPS {
             transaction.undoTransaction();
             this.mostRecentTransaction--;
             this.performingUndo = false;
+        
         }
     }
 
