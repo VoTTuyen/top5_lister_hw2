@@ -15,7 +15,6 @@ import MoveItem_Transaction from "./MoveItem_Transaction";
 import RenameItem_Transaction from "./RenameItem_Transaction";
 
 /*
-Undo/Redo - Undo/Redo should also work using Control-Z and Control-Y.
 List Saving - after every single edit, data should be saved to local storage. Remember to also save session data when necessary, like when a list is deleted.
 Foolproof Design - make sure the undo, redo, and close buttons are only enabled when they are usable. When disabled, they should look faded (use transparency) and should not be clickable.
 */
@@ -130,7 +129,7 @@ class App extends React.Component {
       list.items[index] = newText;
       this.db.mutationUpdateList(list);
     };
-    
+
     let renameItem_Transaction = new RenameItem_Transaction(foo, list, index, oldText, newText);
     this.jsTPS.addTransaction(renameItem_Transaction);
     this.setState((prevState) => ({
