@@ -11,6 +11,12 @@ import Sidebar from "./components/Sidebar.js";
 import Workspace from "./components/Workspace.js";
 import Statusbar from "./components/Statusbar.js";
 
+/*
+Undo/Redo - Undo/Redo should also work using Control-Z and Control-Y.
+List Saving - after every single edit, data should be saved to local storage. Remember to also save session data when necessary, like when a list is deleted.
+Foolproof Design - make sure the undo, redo, and close buttons are only enabled when they are usable. When disabled, they should look faded (use transparency) and should not be clickable.
+*/
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -124,7 +130,7 @@ class App extends React.Component {
     let items = this.state.currentList.items;
     items.splice(newIndex, 0, items.splice(oldIndex, 1)[0]);
     this.setState((prevState) => ({
-      
+
     }));
 
 
@@ -163,10 +169,23 @@ class App extends React.Component {
     // DELETE AND MAKE THAT CONNECTION SO THAT THE
     // NAME PROPERLY DISPLAYS INSIDE THE MODAL
     this.showDeleteListModal();
-
     this.setState((prevState) => ({
       currentList: prevState.currentList,
       keyNamePair: keyNamePair,
+    }));
+  };
+
+  deleteConfirm = () => {
+    let key = this.state.keyNamePair.key;
+    console.log("Key: " + key);
+    this.db.mutationDeleteList(key);
+    this.hideDeleteListModal();
+    let loadedSessionData = this.db.queryGetSessionData();
+    this.setState((prevState) => ({
+      currentList: prevState.currentList,
+      keyNamePair: null,
+      sessionData: loadedSessionData,
+
     }));
   };
   // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
@@ -203,6 +222,7 @@ class App extends React.Component {
         <DeleteModal
           listKeyPair={this.state.keyNamePair}
           hideDeleteListModalCallback={this.hideDeleteListModal}
+          deleteConfirm={this.deleteConfirm}
         />
       </div>
     );

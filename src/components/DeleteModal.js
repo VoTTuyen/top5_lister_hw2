@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 export default class DeleteModal extends Component {
     render() {
-        const { listKeyPair, hideDeleteListModalCallback } = this.props;
+        const { listKeyPair, hideDeleteListModalCallback , deleteConfirm} = this.props;
         let name = "";
         if (listKeyPair) {
             name = listKeyPair.name;
@@ -21,7 +21,7 @@ export default class DeleteModal extends Component {
                 <button
                   id="dialog-yes-button"
                   className="modal-button"
-                  onClick={hideDeleteListModalCallback}
+                  onClick={deleteConfirm}
                 >
                   Confirm
                 </button>
